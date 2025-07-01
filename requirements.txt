@@ -1,0 +1,19 @@
+# Focus Blocker - Python Dependencies
+# All dependencies are part of Python standard library, so no external packages are required
+
+# Core dependencies (built into Python):
+# - tkinter (GUI framework)
+# - threading (multithreading support)
+# - time (time utilities)
+# - os (operating system interface)
+# - sys (system-specific parameters)
+# - signal (signal handling)
+# - secrets (cryptographically strong random numbers)
+# - hashlib (hash algorithms)
+# - json (JSON encoder/decoder)
+# - platform (platform identification)
+# - datetime (date and time utilities)
+# - subprocess (subprocess management)
+# - ctypes (C compatible data types)
+
+# No external packages required - this application uses only Python standard library modules 
