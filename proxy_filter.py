@@ -7,13 +7,38 @@ Filters web traffic based on user's mission and productivity goals
 import json
 import logging
 import re
+import sys
 from pathlib import Path
 from datetime import datetime
 from urllib.parse import urlparse
-import appdirs
 
-from mitmproxy import http
-from mitmproxy.script import concurrent
+# Handle optional dependencies with graceful fallbacks
+try:
+    import appdirs
+except ImportError:
+    print("Warning: appdirs not installed. Using fallback directory logic.")
+    class MockAppdirs:
+        @staticmethod
+        def user_data_dir(app_name):
+            import os
+            if sys.platform == "win32":
+                return Path.home() / "AppData" / "Local" / app_name
+            else:
+                return Path.home() / ".config" / app_name
+    appdirs = MockAppdirs()
+
+try:
+    from mitmproxy import http
+    from mitmproxy.script import concurrent
+    MITMPROXY_AVAILABLE = True
+except ImportError:
+    print("Error: mitmproxy not installed. Please install with: pip install mitmproxy")
+    print("This script requires mitmproxy to function properly.")
+    MITMPROXY_AVAILABLE = False
+    
+    # Create mock classes for development/testing when mitmproxy is not available
+    http = None
+    concurrent = None
 
 
 class FocusProxyFilter:
@@ -174,8 +199,11 @@ class FocusProxyFilter:
             
         return "Unknown block reason"
         
-    def should_allow_request(self, flow: http.HTTPFlow):
+    def should_allow_request(self, flow):
         """Main decision logic for allowing/blocking requests"""
+        if not MITMPROXY_AVAILABLE:
+            return True, "Mitmproxy not available"
+            
         url = flow.request.pretty_url
         parsed_url = urlparse(url)
         domain = parsed_url.netloc.lower()
@@ -202,11 +230,16 @@ class FocusProxyFilter:
             # In non-strict mode, allow by default unless explicitly blocked
             return True, f"Non-strict mode: allowing {url}"
             
-    def log_request(self, flow: http.HTTPFlow, allowed: bool, reason: str):
+    def log_request(self, flow, allowed: bool, reason: str):
         """Log the request decision"""
         timestamp = datetime.now().isoformat()
-        url = flow.request.pretty_url
-        method = flow.request.method
+        
+        if MITMPROXY_AVAILABLE and hasattr(flow, 'request'):
+            url = flow.request.pretty_url
+            method = flow.request.method
+        else:
+            url = "unknown"
+            method = "GET"
         
         log_entry = f"{timestamp} | {method} | {url} | {reason}\n"
         
@@ -224,8 +257,11 @@ class FocusProxyFilter:
             status = "ALLOWED" if allowed else "BLOCKED"
             self.logger.info(f"{status}: {method} {url} - {reason}")
             
-    def create_block_response(self, flow: http.HTTPFlow, reason: str):
+    def create_block_response(self, flow, reason: str):
         """Create a blocked response page"""
+        if not MITMPROXY_AVAILABLE or not http:
+            return
+            
         block_html = f"""
         <!DOCTYPE html>
         <html>
@@ -277,7 +313,7 @@ class FocusProxyFilter:
                 </div>
                 
                 <p><strong>Blocked URL:</strong></p>
-                <div class="url">{flow.request.pretty_url}</div>
+                <div class="url">{getattr(flow.request, 'pretty_url', 'unknown') if hasattr(flow, 'request') else 'unknown'}</div>
                 
                 <p><strong>Reason:</strong> {reason}</p>
                 
@@ -299,9 +335,11 @@ class FocusProxyFilter:
 filter_instance = FocusProxyFilter()
 
 
-@concurrent
-def request(flow: http.HTTPFlow) -> None:
+def request(flow) -> None:
     """Handle incoming HTTP requests"""
+    if not MITMPROXY_AVAILABLE:
+        return
+        
     try:
         allowed, reason = filter_instance.should_allow_request(flow)
         
@@ -317,8 +355,11 @@ def request(flow: http.HTTPFlow) -> None:
         filter_instance.log_request(flow, True, f"Error occurred, allowing by default: {e}")
 
 
-def response(flow: http.HTTPFlow) -> None:
+def response(flow) -> None:
     """Handle HTTP responses (optional processing)"""
+    if not MITMPROXY_AVAILABLE:
+        return
+        
     try:
         # Could add response modification here if needed
         # For now, just pass through
@@ -327,9 +368,18 @@ def response(flow: http.HTTPFlow) -> None:
         filter_instance.logger.error(f"Error processing response: {e}")
 
 
+# Apply concurrent decorator if available
+if MITMPROXY_AVAILABLE and concurrent:
+    request = concurrent(request)
+
+
 # Entry point for mitmdump
 def start():
     """Called when the script starts"""
+    if not MITMPROXY_AVAILABLE:
+        print("Cannot start: mitmproxy not available")
+        return
+        
     filter_instance.logger.info("Focus Proxy Filter started")
     filter_instance.logger.info(f"Mission: {filter_instance.mission.get('title', 'Unknown')}")
     filter_instance.logger.info(f"Allowed domains: {len(filter_instance.mission.get('allowed_domains', []))}")
@@ -338,4 +388,5 @@ def start():
 
 def done():
     """Called when the script shuts down"""
-    filter_instance.logger.info("Focus Proxy Filter stopped")
+    if MITMPROXY_AVAILABLE:
+        filter_instance.logger.info("Focus Proxy Filter stopped")
