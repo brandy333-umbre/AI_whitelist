@@ -1,0 +1,40 @@
+{
+  "mission": "Focus on software development, programming tutorials, technical documentation, and productive learning resources. Avoid social media, entertainment, news, and shopping websites that could distract from coding and professional development.",
+  "created": "2024-01-01T00:00:00Z",
+  "description": "Mission-driven web filtering for productive software development work",
+  "keywords": [
+    "programming",
+    "coding",
+    "development",
+    "technical documentation",
+    "tutorials",
+    "learning",
+    "productivity",
+    "work"
+  ],
+  "examples": {
+    "allowed": [
+      "github.com",
+      "stackoverflow.com",
+      "developer.mozilla.org",
+      "docs.python.org",
+      "code.visualstudio.com",
+      "medium.com/programming",
+      "hackernews.ycombinator.com"
+    ],
+    "blocked": [
+      "facebook.com",
+      "twitter.com",
+      "instagram.com",
+      "reddit.com/r/funny",
+      "youtube.com/watch?v=entertainment",
+      "netflix.com",
+      "amazon.com/shopping"
+    ]
+  },
+  "settings": {
+    "similarity_threshold": 0.4,
+    "cache_enabled": true,
+    "log_level": "INFO"
+  }
+}
