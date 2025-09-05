@@ -1,0 +1,69 @@
+what is the purpose of the app?:
+-This is a productivity desktop application, that
+
+flow on user end:
+-user opens double clicks the app once it is installed from the website 
+-the first time the user is loading the application, they will be asked 
+to enter their email, then they will click the next button
+-They will then be prompted to enter 3 email addresses of people they trust,
+they email adresses will be labbelled 1 2 and 3 and, they
+are told that this is so that they cannot unblock the proxy once it is active
+unless they retrieve the 12 digit passwords from each person and enter them,
+they are told that this is done to make the block effective,
+
+-once the user has entered 3 valid email adresses
+they click the next button and then the application will close
+
+backend:
+a random 12 digit string of characters is generated for each email entered,
+these 3 12 digi random strings combined is the password for the users account
+an email from Anchorite, (not from the users own email adress) will be sent to
+ each of the email adresses that the user entered,
+the email subject will say "Anchorite password {email address number} for 
+{users email}"
+the body of the email will then contain the 12 digit random number 
+
+frontend:
+-a prompt appears asking what the user would like to achieve in this session,
+they are asked to make this response specific, the users response must be
+at least 50 characters long,
+
+-then they click the next button, if their response is less than 50 characters long
+they are presented with an error stating that their mission statement must be at
+least 50 characters long, if they click the next button successfully 
+
+-if they click the next button successfully then the user is presented with a prompt
+asking how many minutes they would like to allocate to this task with 
+a maximum of 300 minutes
+
+-the user then clicks the complete button, but if their allocated time is more
+than 300 minutes then they are presented with an error stating that the time
+must be less than 300 minutes, if they click the next button with a time
+less than or equal to 300 minutes, the window closes and the proxy is then activated
+
+-then the user will browse the web as usual but when they try and visit a website
+that is not related to their mission the website will be blocked
+
+-when the time allocated to the mission is finnished the app will activate a
+popup window that shows two collumns one collumn is all the websites that 
+the user visited, the collumn next is a list of binary ratings 
+(basically a checkbox or toggle) for each website, this rating is either 1 (productive)
+or 0 (distracting) based on how useful the website was for the users mission. 
+once they have rated all the websites they want to they can click the complete button. 
+They can also close the window without rating any websites, the rating they have given 
+each website is fed back into the machine learning algorithm automatically
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

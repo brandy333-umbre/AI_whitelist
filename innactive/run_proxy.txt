@@ -1,0 +1,18 @@
+@echo off
+echo ======================================
+echo    AI-Driven Proxy Filter Starting
+echo ======================================
+echo.
+echo Using bundled certificates (no manual setup required)
+echo Proxy running on: localhost:8080
+echo.
+echo BROWSER SETUP:
+echo 1. Set browser proxy to: 127.0.0.1:8080
+echo 2. Visit http://mitm.it to install certificate
+echo.
+echo Press Ctrl+C to stop the proxy
+echo ======================================
+echo.
+
+mitmdump -s proxy_filter.py --listen-port 8080 --set confdir=certs
+pause

@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "description": "Enhanced training data schema with all metadata extraction features for LLM generation",
+  "total_examples": 10000,
+  "distribution": {
+    "productive": 5000,
+    "distracting": 5000
+  },
+  "examples": [
+    {
+      "url": "https://www.youtube.com/watch?v=HXNhEYqFo0o",
+      "mission": "I want to learn logistic regression and machine learning techniques in Python for my data science career",
+      "label": 1,
+      "category": "educational_video",
+      
+      "enhanced_metadata": {
+        "title": "Logistic Regression - Clearly Explained!!!",
+        "meta_description": "An in-depth explanation of logistic regression with step-by-step examples and Python implementation",
+        "content_keywords": ["logistic regression", "machine learning", "statistics", "python", "data science"],
+        "extracted_text": "Logistic regression is a statistical method used for binary classification problems. In this tutorial, we'll explore the mathematical foundations, implement it in Python, and discuss real-world applications in data science and machine learning.",
+        "domain": "youtube.com",
+        "path": "/watch",
+        "query_params": {"v": "HXNhEYqFo0o"},
+        "has_video": true,
+        "has_forms": false,
+        "content_length": 2847,
+        "images_count": 12,
+        "links_count": 25,
+        "external_links_count": 3,
+        "response_time_ms": 342,
+        
+        "youtube_title": "Logistic Regression - Clearly Explained!!!",
+        "youtube_description": "Logistic regression is one of the most fundamental algorithms in machine learning and statistics. In this comprehensive tutorial, we'll cover: 1) The mathematical foundation of logistic regression 2) How it differs from linear regression 3) Step-by-step Python implementation using scikit-learn 4) Real-world examples and applications 5) Common pitfalls and how to avoid them. Perfect for beginners and intermediate data scientists looking to master this essential technique.",
+        "youtube_channel": "StatQuest with Josh Starmer",
+        "youtube_category": "Education",
+        "content_quality_score": 0.92,
+        "educational_indicators": 15,
+        "entertainment_indicators": 0,
+        
+        "og_title": "Logistic Regression - Clearly Explained!!!",
+        "og_description": "Master logistic regression with this comprehensive tutorial covering theory, implementation, and real-world applications",
+        "og_type": "video",
+        
+        "paragraph_count": 8,
+        "heading_count": 6,
+        "list_count": 3,
+        "avg_paragraph_length": 127,
+        "has_structured_content": true,
+        "has_code": true,
+        "code_block_count": 4
+      }
+    },
+    
+    {
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "mission": "I want to learn logistic regression and machine learning techniques in Python for my data science career",
+      "label": 0,
+      "category": "entertainment_video",
+      
+      "enhanced_metadata": {
+        "title": "Rick Astley - Never Gonna Give You Up (Official Video)",
+        "meta_description": "The official video for Rick Astley's 1987 hit Never Gonna Give You Up. Classic 80s pop music video.",
+        "content_keywords": ["rick astley", "never gonna give you up", "80s music", "pop", "classic"],
+        "extracted_text": "Classic 1980s pop music video featuring Rick Astley performing his hit song Never Gonna Give You Up. Nostalgic throwback to the golden age of MTV and music videos.",
+        "domain": "youtube.com", 
+        "path": "/watch",
+        "query_params": {"v": "dQw4w9WgXcQ"},
+        "has_video": true,
+        "has_forms": false,
+        "content_length": 1245,
+        "images_count": 8,
+        "links_count": 18,
+        "external_links_count": 2,
+        "response_time_ms": 298,
+        
+        "youtube_title": "Rick Astley - Never Gonna Give You Up (Official Video)",
+        "youtube_description": "The official video for Rick Astley's classic 1987 hit Never Gonna Give You Up. Experience the nostalgic charm of 80s pop music with this iconic song that launched a thousand memes. Subscribe for more classic hits and throwback music videos from the golden age of pop.",
+        "youtube_channel": "Rick Astley Official",
+        "youtube_category": "Music",
+        "content_quality_score": 0.15,
+        "educational_indicators": 0,
+        "entertainment_indicators": 12,
+        
+        "og_title": "Rick Astley - Never Gonna Give You Up (Official Video)",
+        "og_description": "Classic 80s pop music video - the original rickroll",
+        "og_type": "video",
+        
+        "paragraph_count": 2,
+        "heading_count": 1,
+        "list_count": 0,
+        "avg_paragraph_length": 45,
+        "has_structured_content": false,
+        "has_code": false,
+        "code_block_count": 0
+      }
+    },
+    
+    {
+      "url": "https://docs.python.org/3/tutorial/classes.html",
+      "mission": "I want to learn logistic regression and machine learning techniques in Python for my data science career",
+      "label": 1,
+      "category": "documentation",
+      
+      "enhanced_metadata": {
+        "title": "9. Classes — Python 3.12.0 documentation",
+        "meta_description": "Python classes tutorial covering class definition, inheritance, and object-oriented programming concepts",
+        "content_keywords": ["python", "classes", "object oriented programming", "inheritance", "tutorial"],
+        "extracted_text": "Classes provide a means of bundling data and functionality together. Creating a new class creates a new type of object, allowing new instances of that type to be made. Each class instance can have attributes attached to it for maintaining its state. Class instances can also have methods for modifying their state.",
+        "domain": "docs.python.org",
+        "path": "/3/tutorial/classes.html", 
+        "query_params": {},
+        "has_video": false,
+        "has_forms": false,
+        "content_length": 15420,
+        "images_count": 0,
+        "links_count": 89,
+        "external_links_count": 5,
+        "response_time_ms": 156,
+        
+        "youtube_title": "",
+        "youtube_description": "",
+        "youtube_channel": "",
+        "youtube_category": "",
+        "content_quality_score": 0.89,
+        "educational_indicators": 22,
+        "entertainment_indicators": 0,
+        
+        "og_title": "Python Classes Tutorial",
+        "og_description": "Learn object-oriented programming in Python with classes, inheritance, and methods",
+        "og_type": "article",
+        
+        "paragraph_count": 45,
+        "heading_count": 15,
+        "list_count": 8,
+        "avg_paragraph_length": 185,
+        "has_structured_content": true,
+        "has_code": true,
+        "code_block_count": 32
+      }
+    }
+  ],
+  
+  "llm_generation_guidelines": {
+    "mission_templates": [
+      "I want to learn logistic regression and machine learning techniques in Python for my data science career",
+      "I need to master web development with React and JavaScript to build modern applications", 
+      "I'm studying computer science fundamentals including algorithms and data structures for my degree",
+      "I want to learn digital marketing and SEO strategies to grow my online business",
+      "I need to understand financial literacy and investment strategies for personal wealth building"
+    ],
+    
+    "productive_url_patterns": [
+      "YouTube educational channels: 3Blue1Brown, StatQuest, freeCodeCamp, Khan Academy, MIT OpenCourseWare",
+      "Documentation sites: docs.python.org, pytorch.org, react.dev, developer.mozilla.org",
+      "Educational platforms: coursera.org, edx.org, udacity.com, kaggle.com/learn",
+      "Academic resources: arxiv.org, scholar.google.com, university websites",
+      "Tutorial sites: realpython.com, w3schools.com, tutorialspoint.com"
+    ],
+    
+    "distracting_url_patterns": [
+      "Entertainment YouTube: music videos, comedy, gaming, vlogs, memes",
+      "Social media: reddit.com/r/funny, twitter.com, instagram.com, tiktok.com",
+      "News & gossip: tmz.com, buzzfeed.com, celebrity news sites", 
+      "Shopping: amazon.com, ebay.com, shopping sites",
+      "Entertainment: netflix.com, twitch.tv, gaming sites"
+    ],
+    
+    "metadata_generation_rules": {
+      "educational_indicators": "Count keywords like: tutorial, learn, course, education, explain, guide, how-to, lesson, training, academic, research, algorithm, programming, development, science, mathematics",
+      "entertainment_indicators": "Count keywords like: funny, comedy, meme, cute, viral, trending, celebrity, gossip, music video, gaming, reaction, prank, challenge, fail, epic",
+      "content_quality_score": "0.8-0.95 for educational content, 0.1-0.3 for entertainment",
+      "youtube_descriptions": "Educational videos: 200-500 chars with learning objectives. Entertainment: 100-200 chars with engaging language",
+      "content_length": "Educational sites: 5000-20000 chars. Entertainment: 500-2000 chars"
+    }
+  }
+}

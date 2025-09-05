@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""
+AI Filter - Mission-driven URL filtering using sentence embeddings
+"""
+
+import sqlite3
+import json
+import time
+import logging
+from datetime import datetime
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+import threading
+from typing import Optional, Tuple
+
+class AIFilter:
+    def __init__(self, cache_db_path: str = "filter_cache.db", log_file: str = "activity.log"):
+        """Initialize AI Filter with caching and logging"""
+        self.cache_db_path = cache_db_path
+        self.log_file = log_file
+        self.mission_embedding = None
+        self.mission_text = None
+        self.threshold = 0.75
+        self.last_similarity: Optional[float] = None
+        self._lock = threading.Lock()
+        
+        # Initialize lightweight embedding model
+        print("Loading sentence transformer model...")
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')  # Fast, lightweight model
+        print("Model loaded successfully")
+        
+        # Setup database and logging
+        self._setup_cache_db()
+        self._setup_logging()
+    
+    def _setup_cache_db(self):
+        """Initialize SQLite cache database"""
+        with sqlite3.connect(self.cache_db_path) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS url_cache (
+                    url TEXT PRIMARY KEY,
+                    decision INTEGER,  -- 1 for allow, 0 for block
+                    timestamp REAL,
+                    decision_time_ms REAL
+                )
+            """)
+            conn.commit()
+    
+    def _setup_logging(self):
+        """Setup activity logging"""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(self.log_file),
+                logging.StreamHandler()
+            ]
+        )
+        self.logger = logging.getLogger(__name__)
+    
+    def set_mission(self, mission_text: str):
+        """Set the mission text and compute its embedding"""
+        with self._lock:
+            self.mission_text = mission_text
+            start_time = time.time()
+            self.mission_embedding = self.model.encode([mission_text])[0]
+            embedding_time = (time.time() - start_time) * 1000
+            
+            self.logger.info(f"Mission set: '{mission_text}' (embedding time: {embedding_time:.2f}ms)")
+            
+            # Clear cache when mission changes
+            with sqlite3.connect(self.cache_db_path) as conn:
+                conn.execute("DELETE FROM url_cache")
+                conn.commit()
+    
+    def _get_cached_decision(self, url: str) -> Optional[bool]:
+        """Get cached decision for URL"""
+        with sqlite3.connect(self.cache_db_path) as conn:
+            result = conn.execute(
+                "SELECT decision FROM url_cache WHERE url = ?", 
+                (url,)
+            ).fetchone()
+            return bool(result[0]) if result else None
+    
+    def _cache_decision(self, url: str, decision: bool, decision_time_ms: float):
+        """Cache URL decision"""
+        with sqlite3.connect(self.cache_db_path) as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO url_cache (url, decision, timestamp, decision_time_ms) VALUES (?, ?, ?, ?)",
+                (url, int(decision), time.time(), decision_time_ms)
+            )
+            conn.commit()
+    
+    def _compute_similarity(self, url: str) -> float:
+        """Compute cosine similarity between URL and mission"""
+        if self.mission_embedding is None:
+            raise ValueError("Mission not set. Call set_mission() first.")
+        
+        # Create contextual description of the URL for better embedding
+        url_context = self._create_url_context(url)
+        url_embedding = self.model.encode([url_context])[0]
+        
+        # Compute cosine similarity
+        similarity = cosine_similarity(
+            [self.mission_embedding], 
+            [url_embedding]
+        )[0][0]
+        self.last_similarity = similarity
+        
+        return similarity
+    
+    def _create_url_context(self, url: str) -> str:
+        """Create contextual description from URL for better embedding"""
+        # Extract domain and path information
+        if "://" in url:
+            url = url.split("://", 1)[1]
+        
+        parts = url.replace("/", " ").replace("-", " ").replace("_", " ").replace(".", " ")
+        
+        # Add context words to help with semantic matching
+        context = f"website content about {parts} web page information"
+        return context
+    
+    def is_url_allowed(self, url: str) -> bool:
+        """
+        Determine if URL should be allowed based on mission alignment
+        Returns True to allow, False to block
+        """
+        start_time = time.time()
+        
+        try:
+            # Check cache first
+            cached_decision = self._get_cached_decision(url)
+            if cached_decision is not None:
+                decision_time = (time.time() - start_time) * 1000
+                self.logger.info(f"CACHED - {'ALLOW' if cached_decision else 'BLOCK'}: {url} ({decision_time:.2f}ms)")
+                return cached_decision
+            
+            # Compute similarity if not cached
+            if self.mission_embedding is None:
+                # No mission set - block by default
+                self.logger.warning(f"BLOCK (no mission): {url}")
+                return False
+            
+            similarity = self._compute_similarity(url)
+            decision = similarity >= self.threshold
+            decision_time = (time.time() - start_time) * 1000
+            
+            # Cache the decision
+            self._cache_decision(url, decision, decision_time)
+            
+            # Log the decision
+            action = "ALLOW" if decision else "BLOCK"
+            self.logger.info(f"{action}: {url} (sim: {similarity:.3f}, time: {decision_time:.2f}ms)")
+            
+            return decision
+            
+        except Exception as e:
+            decision_time = (time.time() - start_time) * 1000
+            self.logger.error(f"ERROR deciding for {url}: {str(e)} ({decision_time:.2f}ms)")
+            # On error, block by default for safety
+            return False
+    
+    def get_stats(self) -> dict:
+        """Get filtering statistics"""
+        with sqlite3.connect(self.cache_db_path) as conn:
+            total_cached = conn.execute("SELECT COUNT(*) FROM url_cache").fetchone()[0]
+            allowed_count = conn.execute("SELECT COUNT(*) FROM url_cache WHERE decision = 1").fetchone()[0]
+            blocked_count = total_cached - allowed_count
+            
+            avg_time = conn.execute("SELECT AVG(decision_time_ms) FROM url_cache").fetchone()[0] or 0
+            
+        return {
+            "mission": self.mission_text,
+            "total_requests": total_cached,
+            "allowed": allowed_count,
+            "blocked": blocked_count,
+            "avg_decision_time_ms": round(avg_time, 2),
+            "cache_hit_rate": "N/A"  # Would need additional tracking for this
+        }
+    
+    def clear_cache(self):
+        """Clear the decision cache"""
+        with sqlite3.connect(self.cache_db_path) as conn:
+            conn.execute("DELETE FROM url_cache")
+            conn.commit()
+        self.logger.info("Cache cleared")
+
+    def get_last_similarity(self) -> Optional[float]:
+        """Retrieve the last computed similarity score."""
+        return self.last_similarity
+
+
+# Global instance for use in proxy_filter.py
+_ai_filter_instance = None
+
+def get_ai_filter() -> AIFilter:
+    """Get or create the global AI filter instance"""
+    global _ai_filter_instance
+    if _ai_filter_instance is None:
+        _ai_filter_instance = AIFilter()
+    return _ai_filter_instance
+
+def set_mission(mission_text: str):
+    """Set mission for the global AI filter instance"""
+    ai_filter = get_ai_filter()
+    ai_filter.set_mission(mission_text)
+
+def is_url_allowed(url: str) -> bool:
+    """Check if URL is allowed using the global AI filter instance"""
+    ai_filter = get_ai_filter()
+    return ai_filter.is_url_allowed(url)
+
+

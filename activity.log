@@ -1,0 +1,7 @@
+2025-07-03 15:35:44,610 - INFO - Mission set: 'Focus on Python programming and software development' (embedding time: 124.54ms)
+2025-07-03 15:35:44,658 - INFO - ALLOW: https://github.com/python/cpython (similarity: 0.479, time: 34.13ms)
+2025-07-03 15:35:44,699 - INFO - ALLOW: https://stackoverflow.com/questions/python (similarity: 0.465, time: 29.65ms)
+2025-07-03 15:35:44,742 - INFO - BLOCK: https://facebook.com (similarity: 0.014, time: 34.91ms)
+2025-07-03 15:35:44,790 - INFO - ALLOW: https://docs.python.org/3/ (similarity: 0.425, time: 39.90ms)
+2025-07-03 15:35:44,838 - INFO - BLOCK: https://youtube.com/watch?v=cat_video (similarity: 0.115, time: 40.62ms)
+2025-07-03 15:35:44,877 - INFO - BLOCK: https://medium.com/programming-tutorials (similarity: 0.317, time: 30.84ms)

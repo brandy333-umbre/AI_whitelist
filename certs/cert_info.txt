@@ -1,0 +1,5 @@
+Anchorite mitmproxy certificates for distribution
+Generated: 2025-09-01 19:58:07
+Platform: Windows 11
+Files generated: mitmproxy-ca-cert.pem, mitmproxy-ca-cert.cer, mitmproxy-ca-cert-key.pem, mitmproxy-dhparam.pem
+Total files: 4

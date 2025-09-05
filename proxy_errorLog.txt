@@ -1,0 +1,31 @@
+ Client TLS handshake failed. 
+ The client does not trust the proxy's certificate 
+ for rr1---sn-cu-cgnl.googlevideo.com
+  (OpenSSL Error([('SSL routines', '', 'ssl/tls alert certificate unknown')]))
+
+  Client TLS handshake failed. The client does not trust the proxy's certificate for identitytoolkit.googleapis.com (OpenSSL Error([('SSL routines', '', 'ssl/tls alert certificate unknown')]))
+[23:56:28.489][127.0.0.1:53796] client disconnect
+[23:56:28.492][127.0.0.1:53796] server disconnect identitytoolkit.googleapis.com:443 ([2a00:1450:4009:c08::5f]:443)
+[23:56:32.340][127.0.0.1:53798] client connect
+[23:56:32.367][127.0.0.1:53798] server connect cdn.discordapp.com:443 (162.159.129.233:443)
+[23:56:32.402][127.0.0.1:53798] Client TLS handshake
+ failed. The client does not trust the proxy's certificate for 
+ cdn.discordapp.com (OpenSSL Error([('SSL routines', '', 'ssl/tls alert
+  certificate unknown')]))
+
+  TRIED TO SEARCH "PYTHON MACHINE LEARNING" WHICH IS ACCORDING TO MISSION
+  BROWSER ERROR:
+  Your connection is not private
+Attackers might be trying to steal your information from www.google.com (for example, passwords, messages or credit cards). Learn more about this warning
+net::ERR_CERT_AUTHORITY_INVALID
+Subject: www.google.com
+
+Issuer: mitmproxy
+
+Expires on: 19 Aug 2026
+
+Current date: 18 Aug 2025
+
+PEM encoded chain:
+
+LABELED AS NOT SECURE FOR ANY SEARCH

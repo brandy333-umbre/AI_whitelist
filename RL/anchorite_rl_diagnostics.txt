@@ -1,0 +1,96 @@
+
+======================
+Anchorite RL System Audit and Fix Plan
+======================
+
+This document categorizes the current issues and limitations in the Anchorite reinforcement learning (RL) system across its core components. Each problem is described in detail along with the affected file(s) and the root cause.
+
+-----------------------------
+1. llm_training_data_generator.py
+-----------------------------
+
+Problem: Poor URL specificity
+The generator currently produces generic domain-level URLs such as "youtube.com", "twitter.com", "reddit.com", without path, query strings, or context (e.g., /watch?v=abc123). This results in low-resolution training data. The RL model is unable to differentiate between productive YouTube videos and distracting ones, because there’s no URL detail or content context embedded in the data.
+
+Problem: Oversimplified URL labeling logic
+The data generation logic assigns labels based on fixed probability heuristics (e.g., 70% productive, 30% distracting). This fails to reflect actual mission-content relevance and leads to noisy, uninformative supervision.
+
+Problem: Mission statements are too short
+Mission strings generated are often under 50 characters, violating the requirement defined in aim.txt. This not only causes potential user-side validation conflicts, but also limits the richness of context for the RL model to use during decision-making. Mission inputs need to be more descriptive and aligned with realistic user intentions.
+
+Problem: Dataset is too small to support generalization
+The current training dataset only includes around 800–1000 examples (e.g., 40 missions × 20 URLs). This is far too small for a neural network to learn nuanced patterns between user goals and web content. With such limited data, the model can only learn very shallow associations — like “YouTube.com = block” or “Wikipedia.org = allow”. It cannot understand whether a specific YouTube video is helpful for a “learn Python” mission or if it’s a distraction like “funny cat compilation”.
+This is especially problematic because the core value of Anchorite lies in context-aware filtering. The system must distinguish not just between websites, but between content on those websites based on what the user is trying to achieve. A small, domain-level dataset simply doesn’t give it enough variety or context to make informed decisions.
+
+
+Problem: Limited content diversity and realism
+Only a fixed list of hardcoded domains is used. There’s no crawling, scraping, or topical diversification in the mission-URL pairs. For example, Reddit, YouTube, and GitHub are treated monolithically, with no exploration of real-world content patterns (e.g., `/r/learnprogramming` vs `/r/eyebleach`).
+
+Suggested Fixes:
+- Integrate realistic YouTube path-level examples using `/watch?v=` IDs.
+- Extend mission prompts to generate at least 50+ character, specific task goals.
+- Replace probability-based labels with similarity-based heuristics between mission and content (e.g., embedding cosine similarity).
+- Crawl or use static datasets for realistic examples of useful vs non-useful paths.
+-The data generation system should be scaled up to produce at least 5,000–10,000 labeled examples.
+
+-----------------------------
+2. pretrain_rl_model.py
+-----------------------------
+
+Problem: Supervised training on weak data
+Due to the poor quality of `offline_training_data.json`, the model is trained on inputs lacking semantic detail or task relevance. This produces a model that learns basic domain name associations (e.g., “youtube.com” = allow/block), rather than true contextual filtering.
+
+Problem: No validation of mission-label alignment
+The training pipeline does not validate whether the label for a URL is actually appropriate given the mission context. As a result, it risks learning false correlations, such as always blocking Reddit even when it’s mission-relevant.
+
+Suggested Fixes:
+- Improve training data realism (see llm_training_data_generator.py fixes).
+- Filter or rebalance training samples by mission-content match score.
+
+-----------------------------
+3. rl_filter.py
+-----------------------------
+
+Problem: Shallow feature extraction
+Current features include URL strings, domain-based heuristics, and sentence embeddings of mission and URL — but lack response content such as `<title>`, Open Graph tags, or video/channel descriptions. This prevents accurate filtering on platforms like YouTube.
+
+Problem: No metadata-level inspection
+The feature extractor doesn’t retrieve or analyze metadata (e.g., YouTube video titles, creator names, categories) from the actual HTTP response or HTML. As a result, all YouTube videos are treated equally.
+
+Problem: Inability to detect distractions within iframe/embed content
+If a productive page includes embedded TikToks or YouTube videos, this may bypass the filter since iframe content is not extracted and processed.
+
+Suggested Fixes:
+- Integrate HTML parsing to extract page titles, `<meta>` and `<og:*>` fields.
+- For video sites, extract the title, channel, and description using regex or a JS scraping library.
+- Expand feature vector with content-level indicators (e.g., title relevance, channel quality).
+
+-----------------------------
+4. rl_proxy_filter.py (mitmproxy)
+-----------------------------
+
+Problem: Insufficient request detail capture
+Currently only the raw URL is passed to the RL filter. This omits valuable metadata such as headers (User-Agent, Referer), query strings, or request body (for POSTs).
+
+Problem: No response analysis
+The proxy does not analyze HTTP responses — this means it misses content that could inform whether the request is relevant to the mission (e.g., YouTube video title or Reddit thread title).
+
+Problem: No session-level behavior tracking
+There’s no tracking of how long a user stayed on a page, what actions they took (e.g., watching vs scrolling), or how many times they visited a domain. These are useful signals for feedback-based learning.
+
+Suggested Fixes:
+- Log full request details including headers, path, and query.
+- Intercept HTML response bodies and extract content metadata (title, meta description, etc).
+- Track per-domain visit frequency and dwell time (e.g., via timestamps).
+
+-----------------------------
+5. aim.txt and User Experience Misalignment
+-----------------------------
+
+Problem: Mission statement requirement not enforced in training
+The training generator does not respect the minimum 50-character requirement for missions stated in `aim.txt`. This leads to unrealistic training data that doesn't match real user input constraints.
+
+Suggested Fix:
+- Enforce mission character length constraint in `generate_missions()`.
+- Train the model only on realistic inputs that mimic live user behavior.
+

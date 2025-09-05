@@ -1,0 +1,8 @@
+-there is a problem because if the youtube mainpage remains unblocked, then 
+the user will be able to see loads of videso non related to mission and
+play them just by hovering there mouse over the video
+
+-currently llm data gen is only generating basic urls like youtube.com, this 
+is too little data for the proxy to make more accurrate and specific decisions
+
+-
